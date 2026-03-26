@@ -1,0 +1,140 @@
+.matrix-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.matrix-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  text-align: center;
+  color: #adb5bd;
+}
+
+.empty-matrix-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.matrix-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.matrix-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.matrix-header {
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.matrix-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.matrix-badge {
+  background: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.matrix-wrapper {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 0 auto;
+}
+
+.matrix-table th,
+.matrix-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.vertex-header {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  position: sticky;
+  top: 0;
+}
+
+.corner-cell {
+  background: #f8f9fa;
+}
+
+.matrix-cell {
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s ease;
+}
+
+.matrix-cell.modified {
+  background: #fff3cd;
+  animation: pulse 0.5s ease;
+}
+
+.matrix-cell.infinity {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.matrix-cell.predecessor {
+  color: #28a745;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    background: #ffc107;
+  }
+  100% {
+    transform: scale(1);
+    background: #fff3cd;
+  }
+}
+
+/* Scrollbar for matrix wrapper */
+.matrix-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.matrix-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.matrix-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.matrix-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
