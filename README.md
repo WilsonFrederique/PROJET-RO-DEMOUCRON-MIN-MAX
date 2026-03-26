@@ -45,7 +45,7 @@ L’objectif principal est de :
 
 Un script PowerShell est fourni pour **automatiser totalement le lancement du projet**.
 
-### ◙ Étapes
+### ▶️ Étapes
 
 #### Cloner le projet ; Installer les dépendances et Lancer le projet
 ```bash
