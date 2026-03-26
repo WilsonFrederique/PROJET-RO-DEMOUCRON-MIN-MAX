@@ -1,4 +1,4 @@
-# 🧠 Projet RO : CHO - Demoucron Min-Max
+# Projet RO : CHO - Demoucron Min-Max
 
 ---
 
@@ -23,7 +23,7 @@ L’objectif principal est de :
 
 ---
 
-## 🎯 Objectifs pédagogiques
+## ◙ Objectifs pédagogiques
 
 - Comprendre le fonctionnement des graphes
 - Implémenter un algorithme d’ordonnancement
@@ -32,20 +32,20 @@ L’objectif principal est de :
 
 ---
 
-## ⚙️ Technologies utilisées
+## ◙ Technologies utilisées
 
-- ⚛️ React
-- 📊 React Flow (visualisation de graphe)
-- 🧮 JavaScript (logique algorithmique)
-- 🎨 CSS (design et interface)
+- React
+- React Flow (visualisation de graphe)
+- JavaScript (logique algorithmique)
+- CSS (design et interface)
 
 ---
 
-## 🚀 Lancement rapide (Windows)
+## ◙ Lancement rapide (Windows)
 
 Un script PowerShell est fourni pour **automatiser totalement le lancement du projet**.
 
-### ▶️ Étapes
+### ◙ Étapes
 
 #### Cloner le projet ; Installer les dépendances et Lancer le projet
 ```bash
