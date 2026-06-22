@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import GraphView from "./components/GraphView";
 import MatrixDisplay from "./components/MatrixDisplay";
 import GraphInputModal from "./components/GraphInputModal";
-import { demoucronMin } from "./algorithms/demoucronMin";
-import { demoucronMax } from "./algorithms/demoucronMax";
 import { ReactFlowProvider } from "@xyflow/react";
 import { LuGitGraph, LuMenu, LuX } from "react-icons/lu";
+import { demoucronMin, reconstructPath as reconstructMinPath } from "./algorithms/demoucronMin";
+import { demoucronMax, reconstructPath as reconstructMaxPath } from "./algorithms/demoucronMax";
+import { VscTable } from "react-icons/vsc";
+
 import "@xyflow/react/dist/style.css";
 import "./App.css";
 
@@ -19,6 +21,10 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false); // Fixed: proper useState syntax
 
+const [bestPath, setBestPath] = useState([]);
+const [bestPathValue, setBestPathValue] = useState(null);
+const pathColor = algorithm === "min" ? "#e91e63" : "#00bcd4";
+
   // Detect mobile screen
   useEffect(() => {
     const checkMobile = () => {
@@ -29,29 +35,91 @@ function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []); // No missing dependency - setIsMobile is stable
 
-  const runAlgorithm = () => {
-    if (edges.length === 0) {
-      alert("Veuillez ajouter des arcs au graphe");
-      return;
+ 
+const runAlgorithm = () => {
+  if (edges.length === 0) {
+    alert("Veuillez ajouter des arcs au graphe");
+    return;
+  }
+
+  const uniqueVertices = [...new Set(edges.flatMap(e => [e.from, e.to]))].sort();
+  setVertices(uniqueVertices);
+
+  if (algorithm === "min") {
+    const result = demoucronMin(uniqueVertices, edges);
+    setMatrices(result.matrices);
+
+  const sources = uniqueVertices.filter(v =>
+  !edges.some(e => e.to === v)
+);
+
+  const sinks = uniqueVertices.filter(v =>
+  !edges.some(e => e.from === v)
+);
+
+  let best = Infinity;
+let bestPair = null;
+
+sources.forEach(source => {
+  sinks.forEach(sink => {
+
+    const i = uniqueVertices.indexOf(source);
+    const j = uniqueVertices.indexOf(sink);
+
+    if (
+      result.dist[i][j] !== Infinity &&
+      result.dist[i][j] < best
+    ) {
+      best = result.dist[i][j];
+      bestPair = [source, sink];
     }
 
-    const uniqueVertices = [
-      ...new Set(edges.flatMap(e => [e.from, e.to]))
-    ].sort();
-    setVertices(uniqueVertices);
+  });
+});
 
-    let result;
-    if (algorithm === "min") {
-      result = demoucronMin(uniqueVertices, edges);
-      setMatrices(result);
-      setPaths(null);
+    if (bestPair) {
+  const path = reconstructMinPath(
+    result.next,
+    uniqueVertices,
+    bestPair[0],
+    bestPair[1]
+  );
+
+  setBestPath(path);
+  setBestPathValue(best);
+} else {
+      setBestPath([]);
+      setBestPathValue(null);
+    }
+
+  } else {
+    const result = demoucronMax(uniqueVertices, edges);
+    setMatrices(result.matrices);
+
+    let best = -Infinity;
+    let bestPair = null;
+
+    for (let i = 0; i < uniqueVertices.length; i++) {
+      for (let j = 0; j < uniqueVertices.length; j++) {
+        if (i !== j && result.dist[i][j] !== -Infinity && result.dist[i][j] > best) {
+          best = result.dist[i][j];
+          bestPair = [uniqueVertices[i], uniqueVertices[j]];
+        }
+      }
+    }
+
+    if (bestPair) {
+      const path = reconstructMaxPath(result.next, uniqueVertices, bestPair[0], bestPair[1]);
+      setBestPath(path);
+      setBestPathValue(best);
     } else {
-      const resultMax = demoucronMax(uniqueVertices, edges);
-      setMatrices(resultMax.matrices);
-      setPaths(resultMax.D);
+      setBestPath([]);
+      setBestPathValue(null);
     }
-  };
+  }
 
+  setPaths(null); // moved out of branches since it's the same in both
+};
   return (
     <div className="app-container">
       {/* Header - Fully Responsive */}
@@ -151,13 +219,16 @@ function App() {
           <div className="graph-container">
             {edges.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">🎨</div>
                 <h4>Aucun graphe chargé</h4>
                 <p>Cliquez sur "Nouveau Graphe" pour commencer</p>
               </div>
             ) : (
               <ReactFlowProvider>
-                <GraphView edgesData={edges} />
+             <GraphView
+  edgesData={edges}
+  highlightPath={bestPath}
+  pathColor={algorithm === "min" ? "#e91e63" : "#00bcd4"}
+/>
               </ReactFlowProvider>
             )}
           </div>
@@ -167,7 +238,7 @@ function App() {
         <div className="matrices-panel">
           <div className="panel-header">
             <h3 className="panel-title">
-              <span className="panel-icon">📐</span>
+              <span className="panel-icon"><VscTable /></span>
               Matrices des Distances
             </h3>
             {matrices.length > 0 && (

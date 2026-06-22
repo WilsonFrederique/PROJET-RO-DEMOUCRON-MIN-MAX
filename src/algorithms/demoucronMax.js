@@ -1,63 +1,67 @@
+// demoucronMax.js
 export function demoucronMax(vertices, edges) {
-
   const n = vertices.length;
+  const idx = new Map(vertices.map((v, i) => [v, i]));
 
-  let W = Array(n).fill().map(() =>
-    Array(n).fill(-Infinity)
-  );
-
-  for (let i = 0; i < n; i++) {
-    W[i][i] = 0;
-  }
+  let dist = Array.from({ length: n }, () => Array(n).fill(-Infinity));
+  let next = Array.from({ length: n }, () => Array(n).fill(null));
+  let matrices = [];
 
   edges.forEach(e => {
-    const i = vertices.indexOf(e.from);
-    const j = vertices.indexOf(e.to);
-    W[i][j] = Number(e.weight);
+    const i = idx.get(e.from);
+    const j = idx.get(e.to);
+    const w = Number(e.weight);
+    if (i !== undefined && j !== undefined && w > dist[i][j]) {
+      dist[i][j] = w;
+      next[i][j] = j;
+    }
   });
 
-  let matrices = [];
-  matrices.push(W.map(row => [...row]));
-
-  let D = Array(n).fill().map(() =>
-    Array(n).fill(null)
-  );
+  matrices.push(dist.map(row => [...row]));
 
   for (let k = 0; k < n; k++) {
-
-    let newMatrix = W.map(row => [...row]);
+    const newDist = dist.map(row => [...row]);
+    const newNext = next.map(row => [...row]);
 
     for (let i = 0; i < n; i++) {
-
       for (let j = 0; j < n; j++) {
-
-        if (W[i][k] !== -Infinity && W[k][j] !== -Infinity) {
-
-          let candidate = W[i][k] + W[k][j];
-
-          if (candidate > W[i][j]) {
-
-            newMatrix[i][j] = candidate;
-
-            D[i][j] = k;
-
+        if (dist[i][k] !== -Infinity && dist[k][j] !== -Infinity) {
+          const candidate = dist[i][k] + dist[k][j];
+          if (candidate > newDist[i][j]) {
+            newDist[i][j] = candidate;
+            newNext[i][j] = next[i][k];
           }
-
         }
-
       }
-
     }
 
-    W = newMatrix;
-
-    matrices.push(W.map(row => [...row]));
-
+    dist = newDist;
+    next = newNext;
+    matrices.push(dist.map(row => [...row]));
   }
 
-  return {
-    matrices,
-    D
-  };
+  return { matrices, next, dist };
+}
 
+export function reconstructPath(next, vertices, from, to) {
+  const idx = new Map(vertices.map((v, i) => [v, i]));
+  const i = idx.get(from);
+  const j = idx.get(to);
+
+  if (i === undefined || j === undefined) return [];
+  if (next[i][j] === null) return [];
+
+  const path = [from];
+  let current = i;
+  const visited = new Set([i]);
+
+  while (current !== j) {
+    current = next[current][j];
+    if (current === null) return [];
+    if (visited.has(current)) return [];
+    visited.add(current);
+    path.push(vertices[current]);
+  }
+
+  return path;
 }

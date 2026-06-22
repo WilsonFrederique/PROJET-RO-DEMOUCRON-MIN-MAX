@@ -48,28 +48,19 @@ function getLayoutedElements(nodes, edges) {
   return { nodes, edges };
 }
 
-function GraphView({ edgesData }) {
-
+function GraphView({ edgesData, highlightPath = [], pathColor = "#e91e63" }) {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
   useEffect(() => {
-
     if (!edgesData || edgesData.length === 0) return;
 
-    const vertices = [
-      ...new Set(
-        edgesData.flatMap(e => [e.from, e.to])
-      )
-    ];
+    const vertices = [...new Set(edgesData.flatMap(e => [e.from, e.to]))];
 
-    // Création des sommets
     const newNodes = vertices.map((v) => ({
       id: v,
       data: { label: v },
-
       position: { x: 0, y: 0 },
-
       style: {
         width: 40,
         height: 40,
@@ -84,61 +75,44 @@ function GraphView({ edgesData }) {
       }
     }));
 
-    // Création des arcs
-    const newEdges = edgesData.map((edge, index) => ({
-      id: "e" + index,
-      source: edge.from,
-      target: edge.to,
-      label: edge.weight?.toString() || "",
+    const highlightedEdges = new Set();
+    for (let i = 0; i < highlightPath.length - 1; i++) {
+      highlightedEdges.add(`${highlightPath[i]}->${highlightPath[i + 1]}`);
+    }
 
-      type: "smoothstep",
+    const newEdges = edgesData.map((edge, index) => {
+      const isHighlighted = highlightedEdges.has(`${edge.from}->${edge.to}`);
+      return {
+        id: `e${index}`,
+        source: edge.from,
+        target: edge.to,
+        label: edge.weight?.toString() || "",
+        type: "smoothstep",
+        markerEnd: { type: "arrowclosed" },
+        style: {
+          strokeWidth: isHighlighted ? 5 : 2,
+          stroke: isHighlighted ? pathColor : "#888",
+          opacity: isHighlighted ? 1 : 0.25
+        },
+        labelStyle: {
+          fill: isHighlighted ? pathColor : "#222",
+          fontWeight: isHighlighted ? 700 : 400
+        }
+      };
+    });
 
-      markerEnd: {
-        type: "arrowclosed"
-      },
-
-      style: {
-        strokeWidth: 2
-      }
-    }));
-
-
-    // appliquer le layout automatique
     const layouted = getLayoutedElements(newNodes, newEdges);
-
     setNodes(layouted.nodes);
     setEdges(layouted.edges);
-
-  }, [edgesData]);
-
-
+  }, [edgesData, highlightPath, pathColor]);
 
   return (
-
-    <div
-      style={{
-        height: 500,
-        border: "1px solid #ccc",
-        marginTop: "20px"
-      }}
-    >
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-      >
-
+    <div style={{ height: 500, border: "1px solid #ccc", marginTop: "20px" }}>
+      <ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.2 }}>
         <Controls />
         <Background />
-
       </ReactFlow>
-
     </div>
-
   );
-
 }
-
 export default GraphView;
